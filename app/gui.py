@@ -3,7 +3,7 @@ from tkinter import filedialog, messagebox, ttk
 import json
 import core
 import os
-import subprocess
+import shutil
 from PIL import Image, ImageTk
 import threading
 
@@ -399,17 +399,17 @@ class ConverterApp(tk.Tk):
             messagebox.showerror("Error", "Please select a video file first.")
             return
             
-
+    
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         
-
+    
         output_name = self.output_name.get() or config["sub_directory"]
         output_dir = os.path.normpath(os.path.join(base_dir, config["output_dir"], output_name))
         nobg_dir = os.path.normpath(os.path.join(base_dir, config["output_dir"], output_name + "_nobg"))
         processed_dir = os.path.normpath(os.path.join(base_dir, config["processed_dir"], output_name))
         final_video_path = os.path.normpath(os.path.join(base_dir, config["final_video_dir"], output_name + "_final.mp4"))
     
-
+    
         try:
             os.makedirs(output_dir, exist_ok=True)
             self.update_log(f"Created directory: {output_dir}")
@@ -497,6 +497,37 @@ class ConverterApp(tk.Tk):
                 completion_msg += f"- Final video saved to: {final_video_path}"
                 
             messagebox.showinfo("Success", completion_msg)
+            
+            if not self.export_original_frames.get() and os.path.exists(output_dir):
+                self.update_log("Cleaning up original frames...", "info")
+                try:
+                    shutil.rmtree(output_dir)
+                    self.update_log("Original frames removed.", "success")
+                except Exception as e:
+                    self.update_log(f"Error removing original frames: {str(e)}", "error")
+            
+            if not self.export_nobg_frames.get() and os.path.exists(nobg_dir):
+                self.update_log("Cleaning up no-background frames...", "info")
+                try:
+                    shutil.rmtree(nobg_dir)
+                    self.update_log("No-background frames removed.", "success")
+                except Exception as e:
+                    self.update_log(f"Error removing no-background frames: {str(e)}", "error")
+            
+            if not self.export_processed_frames.get() and not self.create_final_video.get() and os.path.exists(processed_dir):
+                self.update_log("Cleaning up processed frames...", "info")
+                try:
+                    shutil.rmtree(processed_dir)
+                    self.update_log("Processed frames removed.", "success")
+                except Exception as e:
+                    self.update_log(f"Error removing processed frames: {str(e)}", "error")
+            elif not self.export_processed_frames.get() and self.create_final_video.get() and os.path.exists(processed_dir):
+                self.update_log("Cleaning up processed frames after video creation...", "info")
+                try:
+                    shutil.rmtree(processed_dir)
+                    self.update_log("Processed frames removed.", "success")
+                except Exception as e:
+                    self.update_log(f"Error removing processed frames: {str(e)}", "error")
             
             if messagebox.askyesno("Open Folder", "Would you like to open the output folder?"):
                 if self.create_final_video.get():
