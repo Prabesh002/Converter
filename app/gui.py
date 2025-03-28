@@ -408,8 +408,38 @@ class ConverterApp(tk.Tk):
         nobg_dir = os.path.normpath(os.path.join(base_dir, config["output_dir"], output_name + "_nobg"))
         processed_dir = os.path.normpath(os.path.join(base_dir, config["processed_dir"], output_name))
         final_video_path = os.path.normpath(os.path.join(base_dir, config["final_video_dir"], output_name + "_final.mp4"))
-    
-    
+        
+        if self.create_final_video.get() and os.path.exists(final_video_path):
+            response = messagebox.askyesnocancel(
+                "File Already Exists", 
+                f"The output video file already exists:\n{final_video_path}\n\nDo you want to overwrite it?\n\nYes: Overwrite\nNo: Choose a new name\nCancel: Abort processing"
+            )
+            
+            if response is None: 
+                self.update_log("Processing cancelled by user.", "info")
+                return
+            elif response is False: 
+                new_name = filedialog.asksaveasfilename(
+                    initialdir=os.path.dirname(final_video_path),
+                    initialfile=os.path.basename(final_video_path),
+                    defaultextension=".mp4",
+                    filetypes=[("MP4 Video", "*.mp4")]
+                )
+                if not new_name:
+                    self.update_log("Processing cancelled by user.", "info")
+                    return
+                final_video_path = new_name
+                
+                new_base_name = os.path.splitext(os.path.basename(new_name))[0]
+                if new_base_name.endswith("_final"):
+                    new_base_name = new_base_name[:-6]  
+                self.output_name.set(new_base_name)
+                output_name = new_base_name
+                
+                output_dir = os.path.normpath(os.path.join(base_dir, config["output_dir"], output_name))
+                nobg_dir = os.path.normpath(os.path.join(base_dir, config["output_dir"], output_name + "_nobg"))
+                processed_dir = os.path.normpath(os.path.join(base_dir, config["processed_dir"], output_name))
+        
         try:
             os.makedirs(output_dir, exist_ok=True)
             self.update_log(f"Created directory: {output_dir}")
