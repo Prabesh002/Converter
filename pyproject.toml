@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "converter"
+version = "0.1.0"
+description = "Simple frame converter tool"
+authors = ["Nellow <prabeshpathak002@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "app" }]  
+package-mode = false  
+
+[tool.poetry.dependencies]
+python = "3.11"
+ffmpeg-python = ">=0.2.0,<0.3.0"
+opencv-python = ">=4.11.0.86,<5.0.0.0"
+numpy = ">=2.2.4,<3.0.0"
+pillow = ">=11.1.0,<12.0.0"
+easygui = ">=0.98.3,<0.99.0"
+llvmlite = "^0.44.0"
+numba = "^0.61.0"
+rembg = "^2.0.65"
+onnxruntime = "^1.21.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
